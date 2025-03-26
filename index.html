@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexical Analyzer</title>
+    <link rel="stylesheet" href="static/index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Lexical Analyzer</h1>
+        <textarea id="code" placeholder="Enter your code here..."></textarea>
+        <button onclick="analyzeCode()">Analyze</button>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function analyzeCode() {
+            const code = document.getElementById('code').value.trim();
+            let outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = "";
+
+            if (!code) {
+                outputDiv.innerHTML = "<p class='error'>Please enter some code to analyze.</p>";
+                return;
+            }
+
+            fetch('/tokenize', {
+                method: 'POST',
+                body: new URLSearchParams({ code: code }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    outputDiv.innerHTML = `<p class='error'>${data.error}</p>`;
+                } else {
+                    outputDiv.innerHTML = "<h3>Tokens:</h3>";
+                    data.forEach(token => {
+                        outputDiv.innerHTML += `<p><strong>${token[0]}:</strong> ${token[1]}</p>`;
+                    });
+                }
+            })
+            .catch(error => {
+                outputDiv.innerHTML = `<p class='error'>Error analyzing code. Please try again.</p>`;
+                console.error("Error:", error);
+            });
+        }
+    </script>
+</body>
+</html>
